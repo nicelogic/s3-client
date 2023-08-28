@@ -17,10 +17,26 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
+backup() {}
+
 class HomeScreenState extends State<HomeScreen> {
-  bool isBeginBackup = false;
   @override
   Widget build(BuildContext context) {
+    final name = context.read<MeCubit>().state.me.name;
+    final pwd = context.read<MeCubit>().state.me.pwd;
+    final backupDir = context.read<MeCubit>().state.me.backupDirPath;
+    final lastDirName = basename(backupDir);
+    if (backupDir.isNotEmpty) {
+      var shell = Shell();
+      shell.run('''
+# Display some text
+echo $name
+echo $pwd
+echo $backupDir
+assets/cmd/mc.exe alias set wumiao https://tenant0.env0.luojm.com:9443 $name $pwd
+assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
+                                        ''');
+    }
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -33,24 +49,35 @@ class HomeScreenState extends State<HomeScreen> {
               children: [
                 Center(
                   child: ElevatedButton(
-                      child: const Text('选择或修改要备份的文件夹'),
-                      onPressed: () async {
-                        String? selectedDirectory =
-                            await FilePicker.platform.getDirectoryPath();
+                      onPressed: context
+                              .watch<MeCubit>()
+                              .state
+                              .me
+                              .backupDirPath
+                              .isNotEmpty
+                          ? null
+                          : () async {
+                              String? selectedDirectory =
+                                  await FilePicker.platform.getDirectoryPath();
 
-                        if (selectedDirectory != null) {
-                          if (context.mounted) {
-                            context
-                                .read<MeCubit>()
-                                .updateBackupDir(dir: selectedDirectory);
+                              if (selectedDirectory != null) {
+                                if (context.mounted) {
+                                  context
+                                      .read<MeCubit>()
+                                      .updateBackupDir(dir: selectedDirectory);
 
-                            var shell = Shell();
-                            final name = context.read<MeCubit>().state.me.name;
-                            final pwd = context.read<MeCubit>().state.me.pwd;
-                            final backupDir =
-                                context.read<MeCubit>().state.me.backupDirPath;
-                            final lastDirName = basename(backupDir);
-                            shell.run('''
+                                  var shell = Shell();
+                                  final name =
+                                      context.read<MeCubit>().state.me.name;
+                                  final pwd =
+                                      context.read<MeCubit>().state.me.pwd;
+                                  final backupDir = context
+                                      .read<MeCubit>()
+                                      .state
+                                      .me
+                                      .backupDirPath;
+                                  final lastDirName = basename(backupDir);
+                                  shell.run('''
 # Display some text
 echo $name
 echo $pwd
@@ -58,15 +85,16 @@ echo $backupDir
 assets/cmd/mc.exe alias set wumiao https://tenant0.env0.luojm.com:9443 $name $pwd
 assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
                                         ''');
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context)
-                                ..hideCurrentSnackBar()
-                                ..showSnackBar(
-                                    const SnackBar(content: Text('备份开始')));
-                            }
-                          }
-                        }
-                      }),
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context)
+                                      ..hideCurrentSnackBar()
+                                      ..showSnackBar(const SnackBar(
+                                          content: Text('备份开始')));
+                                  }
+                                }
+                              }
+                            },
+                      child: const Text('选择要备份的文件夹')),
                 ),
                 const SizedBox(
                   height: 30,
