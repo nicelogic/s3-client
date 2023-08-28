@@ -1,0 +1,14 @@
+{
+  "appTitle": "metoo",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "bottomNavigationBarTabItemTitleChats": "chats",
+  "bottomNavigationBarTabItemTitleContacts": "contacts",
+  "bottomNavigationBarTabItemTitleMe": "me",
+  "loginScreenAppBarTitleLogin": "login",
+  "buttonIconLabelWechatLogin": "wechat login",
+
+
+  "lastPlaceHolder": ""
+}

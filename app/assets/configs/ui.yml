@@ -1,0 +1,13 @@
+
+profile_picture_max_height: 300.0
+profile_picture_max_width: 300.0
+
+contactsPageSize: 10
+contactsInvisibleItemsThreshold: 3 #must > 0
+
+chatsPageSize: 10
+chatsInvisibleItemsThreshold: 3 #must > 0
+chatGroupNameMaxLength: 24
+
+messagesPageSize: 20
+messagesInvisibleItemsThreshold: 2 #must > 0

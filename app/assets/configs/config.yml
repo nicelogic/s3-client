@@ -1,0 +1,16 @@
+
+services:
+  federation: https://federation.app0.env0.luojm.com:9443/query
+  auth: https://auth.app0.env0.luojm.com:9443/query
+  subscription: https://subscription.app0.env0.luojm.com:9443/query
+  subscription_websocket: wss://subscription.app0.env0.luojm.com:9443/query
+  s3: https://s3.app0.env0.luojm.com:9443/query
+  user: https://user.app0.env0.luojm.com:9443/query
+  contact: https://contact.app0.env0.luojm.com:9443/query
+  message: https://message.app0.env0.luojm.com:9443/query
+
+assets:
+  logo:  assets/images/logo/logo.png
+
+token_refresh_minutes: 180
+fail_condition_token_refresh_seconds: 30
