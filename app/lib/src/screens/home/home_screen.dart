@@ -1,9 +1,11 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
-import 'package:process_run/process_run.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../features/me/bloc/me_bloc.dart';
@@ -17,26 +19,81 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-backup() {}
-
 class HomeScreenState extends State<HomeScreen> {
+  Future<Process>? _mirrorProcess;
+  String lastString = '';
+  String lastError = '';
+
+  late String name;
+  late String pwd;
+  late String backupDir;
+
+  backup(String name, String pwd, String backupDir) {
+    if (backupDir.isEmpty) {
+      return;
+    }
+
+    final lastDirName = basename(backupDir);
+    // final textLast =
+    //     'mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName';
+    // final carriageReturn = Platform.isWindows ? '\r\n' : '\n';
+    // pty.write(const Utf8Encoder().convert('SET HOMEDRIVE=C:$carriageReturn'));
+    // pty.write(const Utf8Encoder()
+    //     .convert('SET HOMEPATH=\\Users\\%USERNAME%$carriageReturn'));
+    // pty.write(const Utf8Encoder().convert(
+    //     'SET HOMESHARE=\\\\localhost\\C\$\\Users\\%USERNAME%$carriageReturn'));
+    // pty.write(const Utf8Encoder().convert('cd data $carriageReturn'));
+    // pty.write(const Utf8Encoder().convert('cd flutter_assets $carriageReturn'));
+    // pty.write(const Utf8Encoder().convert('cd assets\\cmd $carriageReturn'));
+    // pty.write(const Utf8Encoder().convert(textLast + carriageReturn));
+    setState(() {
+      try {
+        if (kDebugMode) {
+          _mirrorProcess = Process.start(
+            'assets\\cmd\\mc.exe',
+            [
+              'mirror',
+              '--watch',
+              '--remove',
+              '--overwrite',
+              '--md5',
+              '--debug',
+              backupDir,
+              'wumiao/wumiao/$name/$lastDirName'
+            ],
+            runInShell: false,
+            // mode: ProcessStartMode.detachedWithStdio,
+          );
+        } else {
+          _mirrorProcess = Process.start(
+            // 'assets\\cmd\\mc.exe',
+            'data\\flutter_assets\\assets\\cmd\\mc.exe',
+            [
+              'mirror',
+              '--watch',
+              '--remove',
+              '--overwrite',
+              '--md5',
+              '--debug',
+              backupDir,
+              'wumiao/wumiao/$name/$lastDirName'
+            ],
+            runInShell: false,
+            // mode: ProcessStartMode.detachedWithStdio,
+          );
+        }
+      } catch (e) {
+        backup(name, pwd, backupDir);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final name = context.read<MeCubit>().state.me.name;
-    final pwd = context.read<MeCubit>().state.me.pwd;
-    final backupDir = context.read<MeCubit>().state.me.backupDirPath;
-    final lastDirName = basename(backupDir);
-    if (backupDir.isNotEmpty) {
-      var shell = Shell();
-      shell.run('''
-# Display some text
-echo $name
-echo $pwd
-echo $backupDir
-assets/cmd/mc.exe alias set wumiao https://tenant0.env0.luojm.com:9443 $name $pwd
-assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
-                                        ''');
-    }
+    name = context.read<MeCubit>().state.me.name;
+    pwd = context.read<MeCubit>().state.me.pwd;
+    backupDir = context.read<MeCubit>().state.me.backupDirPath;
+    backup(name, pwd, backupDir);
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -66,7 +123,6 @@ assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
                                       .read<MeCubit>()
                                       .updateBackupDir(dir: selectedDirectory);
 
-                                  var shell = Shell();
                                   final name =
                                       context.read<MeCubit>().state.me.name;
                                   final pwd =
@@ -76,15 +132,7 @@ assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
                                       .state
                                       .me
                                       .backupDirPath;
-                                  final lastDirName = basename(backupDir);
-                                  shell.run('''
-# Display some text
-echo $name
-echo $pwd
-echo $backupDir
-assets/cmd/mc.exe alias set wumiao https://tenant0.env0.luojm.com:9443 $name $pwd
-assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
-                                        ''');
+                                  backup(name, pwd, backupDir);
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context)
                                       ..hideCurrentSnackBar()
@@ -110,96 +158,148 @@ assets/cmd/mc.exe mirror --watch $backupDir wumiao/wumiao/$name/$lastDirName
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.primary)));
                 }),
+                // const SizedBox(
+                //   height: 30,
+                // ),
+                // if (context.watch<MeCubit>().state.me.backupDirPath.isNotEmpty)
+                //   Center(
+                //     child: Column(children: [
+                //       Row(children: [
+                //         Text(
+                //           '实时备份中',
+                //           style: TextStyle(
+                //               color: Theme.of(context).colorScheme.primary),
+                //         ),
+                //         const CircularProgressIndicator(),
+                //       ])
+                //     ]),
+                //   ),
                 const SizedBox(
                   height: 30,
                 ),
-
-                if (context.watch<MeCubit>().state.me.backupDirPath.isNotEmpty)
-                  Center(
-                    child: Column(children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        '实时备份中',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
-                      )
-                    ]),
-                  ),
+                Center(
+                    child: Text(
+                  '实时传输状态：',
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                )),
                 const SizedBox(
-                  height: 30,
+                  height: 20,
                 ),
-                // Text(
-                //   '实时备份状态:',
-                //   style: TextStyle(
-                //       color: Theme.of(context).colorScheme.primary,
-                //       fontSize: 20.0),
-                // ),
-                // Card(
-                //   child: Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //       children: [
-                //         const Text('实时备份状态'),
-                //       ]),
-                // ),
+                if (_mirrorProcess != null)
+                  FutureBuilder(
+                      future: _mirrorProcess,
+                      builder: (BuildContext context,
+                          AsyncSnapshot<Process> snapshot) {
+                        if (snapshot.hasData) {
+                          return StreamBuilder<String>(
+                            stream:
+                                snapshot.data!.stdout.transform(utf8.decoder),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<String> snapshot) {
+                              if (snapshot.hasData) {
+                                lastString = snapshot.data!;
+                                return Center(
+                                    child: SizedBox(
+                                        width: 500,
+                                        child: Text(
+                                          snapshot.data!,
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary),
+                                        )));
+                              } else {
+                                return Center(
+                                    child: SizedBox(
+                                        width: 500,
+                                        child: Text(
+                                          lastString,
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary),
+                                        )));
+                              }
+                            },
+                          );
+                        } else {
+                          return Center(
+                              child: SizedBox(
+                                  width: 500,
+                                  child: Text(
+                                    lastString,
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary),
+                                  )));
+                        }
+                      }),
+                if (_mirrorProcess != null)
+                  FutureBuilder(
+                      future: _mirrorProcess,
+                      builder: (BuildContext context,
+                          AsyncSnapshot<Process> snapshot) {
+                        if (snapshot.hasData) {
+                          return StreamBuilder<String>(
+                            stream:
+                                snapshot.data!.stderr.transform(utf8.decoder),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<String> snapshot) {
+                              if (snapshot.hasData) {
+                                lastError = snapshot.data!;
+                                return Column(children: [
+                                  Center(
+                                      child: Text(
+                                    '调试打印：',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
+                                  )),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Center(
+                                      child: SizedBox(
+                                          width: 500,
+                                          child: Text(
+                                            snapshot.data!,
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary),
+                                          )))
+                                ]);
+                              } else {
+                                return Center(
+                                    child: SizedBox(
+                                        width: 500,
+                                        child: Text(
+                                          lastError,
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary),
+                                        )));
+                              }
+                            },
+                          );
+                        } else {
+                          return Center(
+                              child: SizedBox(
+                                  width: 500,
+                                  child: Text(
+                                    lastError,
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary),
+                                  )));
+                        }
+                      }),
               ],
             ))));
-  }
-}
-
-class TitleBar extends StatelessWidget {
-  const TitleBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final backgroundStartColor = Theme.of(context).colorScheme.primary;
-    final backgroundEndColor = Theme.of(context).colorScheme.primary;
-    return WindowTitleBarBox(
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [backgroundStartColor, backgroundEndColor],
-              stops: const [0.0, 1.0]),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: MoveWindow(),
-            ),
-            const WindowButtons()
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class WindowButtons extends StatelessWidget {
-  const WindowButtons({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final buttonColors = WindowButtonColors(
-      iconNormal: Theme.of(context).colorScheme.onPrimary,
-      mouseOver: Theme.of(context).colorScheme.onPrimary,
-      mouseDown: Theme.of(context).colorScheme.secondary,
-      iconMouseOver: Theme.of(context).colorScheme.secondary,
-      iconMouseDown: Theme.of(context).colorScheme.secondary,
-    );
-
-    return Row(
-      children: [
-        MinimizeWindowButton(colors: buttonColors),
-        MaximizeWindowButton(colors: buttonColors),
-        CloseWindowButton(
-          colors: buttonColors,
-          onPressed: () {},
-        ),
-      ],
-    );
   }
 }

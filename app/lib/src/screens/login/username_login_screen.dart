@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/src/features/me/bloc/me_bloc.dart';
 import 'package:app/src/routes/routes.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +43,14 @@ class UserNameLoginScreenState extends State<UserNameLoginScreen> {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(const SnackBar(content: Text('登录成功')));
+              Process.start('assets/cmd/mc.exe', [
+                'alias',
+                'set',
+                'wumiao',
+                'https://tenant0.env0.luojm.com:9443',
+                userName,
+                password
+              ]);
               context
                   .read<MeCubit>()
                   .updateUserNamePwd(name: userName, pwd: password);

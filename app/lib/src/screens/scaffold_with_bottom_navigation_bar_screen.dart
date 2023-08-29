@@ -1,5 +1,4 @@
 import 'package:app/src/routes/routes.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 
 class ScaffoldWithBottomNavigationBarScreen extends StatefulWidget {
@@ -97,61 +96,6 @@ class _ScaffoldWithBottomNavigationBarScreenState
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person)),
           ]),
-    );
-  }
-}
-
-class TitleBar extends StatelessWidget {
-  const TitleBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final backgroundStartColor = Theme.of(context).colorScheme.primary;
-    final backgroundEndColor = Theme.of(context).colorScheme.primary;
-    return WindowTitleBarBox(
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [backgroundStartColor, backgroundEndColor],
-              stops: const [0.0, 1.0]),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: MoveWindow(),
-            ),
-            const WindowButtons()
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class WindowButtons extends StatelessWidget {
-  const WindowButtons({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final buttonColors = WindowButtonColors(
-      iconNormal: Theme.of(context).colorScheme.onPrimary,
-      mouseOver: Theme.of(context).colorScheme.onPrimary,
-      mouseDown: Theme.of(context).colorScheme.secondary,
-      iconMouseOver: Theme.of(context).colorScheme.secondary,
-      iconMouseDown: Theme.of(context).colorScheme.secondary,
-    );
-
-    return Row(
-      children: [
-        MinimizeWindowButton(colors: buttonColors),
-        MaximizeWindowButton(colors: buttonColors),
-        CloseWindowButton(
-          colors: buttonColors,
-          onPressed: () {},
-        ),
-      ],
     );
   }
 }

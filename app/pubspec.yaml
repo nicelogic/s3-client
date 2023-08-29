@@ -30,7 +30,6 @@ dependencies:
   font_awesome_flutter: ^10.3.0
   yaml: ^3.1.1
   minio_new: ^1.0.2
-  process_run: ^0.13.1
   file_picker: ^5.2.6
   url_launcher: ^6.1.12
   bitsdojo_window: ^0.1.5
@@ -65,3 +64,22 @@ flutter:
     - assets/images/
     - assets/images/logo/
     - assets/configs/
+
+# msix_config:
+#   display_name: 伍瞄文件管理客户端
+#   publisher_display_name: 伍瞄传媒
+#   identity_name: wm.luojm.com
+#   msix_version: 1.0.0.0
+#   logo_path: C:\Users\ice\nicelogic\other\s3-client\app\assets\images\logo\logo.png
+#   capabilities: internetClient
+#   # signtool_options: /v /debug /sm /fd sha256 /n "Msix Testing" /tr http://timestamp.digicert.com
+#   publisher: CN=R3, O=Let's Encrypt, C=US
+#   signtool_options: /fd SHA256 /f "C:\Users\ice\nicelogic\other\s3-client\app\cert\tls.crt"
+  # certificate_path: C:\Users\ice\nicelogic\other\s3-client\app\cert\tls.crt
+
+
+  # sign_msix: false
+  # certificate_path: C:\Users\ice\nicelogic\other\s3-client\app\cert\jwt-public.crt
+  # certificate_password: 123
+  # # publisher: CN=Contoso Software, O=Contoso Corporation, C=US
+  # install_certificate: true

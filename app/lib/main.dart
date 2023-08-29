@@ -33,16 +33,6 @@ void main() async {
     launchAtStartup.enable();
     MeCubit().updateFirstTimeToFalse();
   }
-
+  // await Process.start('taskkill', ['/f', '/t', '/im', 'mc.exe']);
   runApp(const MyApp());
-
-  // doWhenWindowReady(() {
-  //   final win = appWindow;
-  //   // const initialSize = Size(600, 450);
-  //   // win.minSize = initialSize;
-  //   // win.size = initialSize;
-  //   win.alignment = Alignment.center;
-  //   win.title = "伍瞄视频文件管理客户端";
-  //   win.show();
-  // });
 }
